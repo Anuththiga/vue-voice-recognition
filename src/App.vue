@@ -13,7 +13,6 @@ onMounted(() => {
 
   vr.onstart = () => {
     isRecording.value = true
-      console.log(isRecording.value)
   }
 
   vr.onend = () => {
@@ -21,6 +20,10 @@ onMounted(() => {
   }
 
   vr.onresult = (event) => {
+    for(let i = 0; i < event.results.length; i++) {
+      const result = event.results[i]
+      if(result.isFinal) CheckForCommand(result)
+    }
     const trans = Array.from(event.results)
                     .map(result => result[0])
                     .map(result => result.transcript)
@@ -30,6 +33,16 @@ onMounted(() => {
   }
   
 })
+
+const CheckForCommand = (result) => {
+  if(result[0].transcript.includes('stop recording')) {
+    vr.stop()
+  } else if (result[0].transcript.includes('what is the time')) {
+    vr.stop()
+    alert(new Date().toLocaleTimeString())
+    setTimeout(() => vr.start(), 100)
+  }
+}
 
 const ToggleMic = () => {
   if(isRecording.value) {
