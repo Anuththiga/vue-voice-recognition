@@ -1,30 +1,63 @@
 <script setup>
-import HelloWorld from './components/HelloWorld.vue'
+import { ref, onMounted } from 'vue'
+
+const transcript = ref('')
+const isRecording = ref(false)
+
+const Recognition = window.speechRecognition || window.webkitSpeechRecognition
+const vr = new Recognition()
+
+onMounted(() => {
+  vr.continuous = true
+  vr.interimResults = true
+
+  vr.onstart = () => {
+    isRecording.value = true
+      console.log(isRecording.value)
+  }
+
+  vr.onend = () => {
+    isRecording.value = false
+  }
+
+  vr.onresult = (event) => {
+    const trans = Array.from(event.results)
+                    .map(result => result[0])
+                    .map(result => result.transcript)
+                    .join('')
+
+    transcript.value = trans
+  }
+  
+})
+
+const ToggleMic = () => {
+  if(isRecording.value) {
+    vr.stop()
+  } else {
+    vr.start()
+  }
+}
+
 </script>
 
 <template>
-  <div>
-    <a href="https://vitejs.dev" target="_blank">
-      <img src="/vite.svg" class="logo" alt="Vite logo" />
-    </a>
-    <a href="https://vuejs.org/" target="_blank">
-      <img src="./assets/vue.svg" class="logo vue" alt="Vue logo" />
-    </a>
+  <div class="app">
+    <button :class="`mic`" @click="ToggleMic">Record</button>
+    <div class="transcript" v-text="transcript"></div>
   </div>
-  <HelloWorld msg="Vite + Vue" />
 </template>
 
-<style scoped>
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: sans-serif;
 }
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vue:hover {
-  filter: drop-shadow(0 0 2em #42b883aa);
+
+body {
+  background: #654485;
+  color: #fff;
 }
 </style>
